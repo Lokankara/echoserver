@@ -4,12 +4,14 @@ FROM alpine:latest
 # Set the working directory
 WORKDIR /app
 
-# Install curl
-RUN apk --no-cache add curl
+# Install curl and tar
+RUN apk --no-cache add curl tar
 
-# Download and install VictoriaMetrics
-RUN curl -LJO https://github.com/VictoriaMetrics/VictoriaMetrics/releases/download/v1.78.1/victoria-metrics-v1.78.1.tar.gz \
-    && tar -xzf victoria-metrics-v1.78.1.tar.gz \
+# Download VictoriaMetrics tarball
+RUN curl -LO https://github.com/VictoriaMetrics/VictoriaMetrics/releases/download/v1.78.1/victoria-metrics-v1.78.1.tar.gz
+
+# Extract the tarball
+RUN tar -xzf victoria-metrics-v1.78.1.tar.gz \
     && mv victoria-metrics-v1.78.1 victoria-metrics \
     && rm victoria-metrics-v1.78.1.tar.gz
 
