@@ -1,25 +1,13 @@
-# Use a minimal Alpine Linux base image
-FROM alpine:latest
+FROM debian:latest
 
-# Set the working directory
 WORKDIR /app
 
-# Install curl and tar
-RUN apk --no-cache add curl tar
+RUN apt-get update && apt-get install -y curl tar
 
-# Download VictoriaMetrics tarball
-RUN curl -LO https://github.com/VictoriaMetrics/VictoriaMetrics/releases/download/v1.78.1/victoria-metrics-v1.78.1.tar.gz
+RUN curl -L https://github.com/VictoriaMetrics/VictoriaMetrics/releases/download/v1.96.0/victoria-metrics-linux-arm64-v1.96.0.tar.gz | tar xz --strip-components 1
 
-# Extract the tarball
-RUN tar -xzf victoria-metrics-v1.78.1.tar.gz \
-    && mv victoria-metrics-v1.78.1 victoria-metrics \
-    && rm victoria-metrics-v1.78.1.tar.gz
+COPY victoria-metrics.yml /app/victoria-metrics.yml
 
-# Copy the configuration file into the container
-COPY victoria-metrics.yml /app/victoria-metrics/victoria-metrics.yml
-
-# Expose the port used by VictoriaMetrics
 EXPOSE 8428
 
-# Run VictoriaMetrics
-CMD ["/app/victoria-metrics/victoria-metrics", "-config", "/app/victoria-metrics/victoria-metrics.yml"]
+CMD ["/app/victoria-metrics", "-promscrape.config=/app/victoria-metrics.yml"]

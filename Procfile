@@ -1,1 +1,1 @@
-web: java $JAVA_OPTS -cp target/classes:target/dependency/* echoserver.src.main.java.com.luxoft.echoserver.Starter
+web: java $JAVA_OPTS -cp target/classes:target/dependency/* echoserver.src.main.java.com.echoserver.Starter
