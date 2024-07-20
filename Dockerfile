@@ -1,13 +1,22 @@
-FROM debian:latest
+FROM openjdk:21-jdk-slim
 
-WORKDIR /app
+ENV KAFKA_VERSION=3.7.1
+ENV SCALA_VERSION=2.13
+ENV KAFKA_HOME=/opt/kafka
+ENV PATH=$PATH:$KAFKA_HOME/bin
 
-RUN apt-get update && apt-get install -y curl tar
+RUN apt-get update && \
+    apt-get install -y wget tar && \
+    rm -rf /var/lib/apt/lists/*
 
-RUN curl -L https://github.com/VictoriaMetrics/VictoriaMetrics/releases/download/v1.96.0/victoria-metrics-linux-arm64-v1.96.0.tar.gz | tar xz --strip-components 1
+RUN wget https://downloads.apache.org/kafka/${KAFKA_VERSION}/kafka_${SCALA_VERSION}-${KAFKA_VERSION}.tgz && \
+    tar -xzf kafka_${SCALA_VERSION}-${KAFKA_VERSION}.tgz -C /opt && \
+    mv /opt/kafka_${SCALA_VERSION}-${KAFKA_VERSION} ${KAFKA_HOME} && \
+    rm kafka_${SCALA_VERSION}-${KAFKA_VERSION}.tgz
 
-COPY victoria-metrics.yml /app/victoria-metrics.yml
+EXPOSE 2181 9092
 
-EXPOSE 8428
+COPY config/zookeeper.properties /opt/kafka/config/
+COPY config/server.properties /opt/kafka/config/
 
-CMD ["/app/victoria-metrics", "-promscrape.config=/app/victoria-metrics.yml"]
+CMD ["sh", "-c", "zkServer.sh start-foreground & kafka-server-start.sh /opt/kafka/config/server.properties"]
