@@ -1,22 +1,19 @@
-FROM openjdk:21-jdk-slim
-
+FROM openjdk:11-jre-slim
 ENV KAFKA_VERSION=3.7.1
 ENV SCALA_VERSION=2.13
 ENV KAFKA_HOME=/opt/kafka
-ENV PATH=$PATH:$KAFKA_HOME/bin
 
 RUN apt-get update && \
-    apt-get install -y wget tar && \
-    rm -rf /var/lib/apt/lists/*
+    apt-get install -y wget net-tools dnsutils && \
+    apt-get clean
 
-RUN wget https://downloads.apache.org/kafka/${KAFKA_VERSION}/kafka_${SCALA_VERSION}-${KAFKA_VERSION}.tgz && \
-    tar -xzf kafka_${SCALA_VERSION}-${KAFKA_VERSION}.tgz -C /opt && \
-    mv /opt/kafka_${SCALA_VERSION}-${KAFKA_VERSION} ${KAFKA_HOME} && \
-    rm kafka_${SCALA_VERSION}-${KAFKA_VERSION}.tgz
+RUN wget https://downloads.apache.org/kafka/${KAFKA_VERSION}/kafka_${SCALA_VERSION}-${KAFKA_VERSION}.tgz -O /tmp/kafka.tgz && \
+    tar -xzf /tmp/kafka.tgz -C /opt && \
+    mv /opt/kafka_${SCALA_VERSION}-${KAFKA_VERSION} /opt/kafka && \
+    rm /tmp/kafka.tgz
 
-EXPOSE 2181 9092
-
-COPY config/zookeeper.properties /opt/kafka/config/
 COPY config/server.properties /opt/kafka/config/
+COPY config/zookeeper.properties /opt/kafka/config/
+COPY scripts/start-kafka.sh /usr/bin/start-kafka.sh
 
-CMD ["sh", "-c", "/opt/kafka/bin/zookeeper-server-start.sh /opt/kafka/config/zookeeper.properties & /opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server.properties"]
+CMD ["sh", "-c", "/usr/bin/start-kafka.sh"]
