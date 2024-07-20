@@ -19,4 +19,4 @@ EXPOSE 2181 9092
 COPY config/zookeeper.properties /opt/kafka/config/
 COPY config/server.properties /opt/kafka/config/
 
-CMD ["sh", "-c", "zkServer.sh start-foreground & kafka-server-start.sh /opt/kafka/config/server.properties"]
+CMD ["sh", "-c", "/opt/kafka/bin/zookeeper-server-start.sh /opt/kafka/config/zookeeper.properties & /opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server.properties"]
